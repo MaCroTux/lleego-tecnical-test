@@ -33,3 +33,6 @@ tests: build composer_install # Lanza la suits de test con cobertura
 
 up: # Levanta el proyecto
 	symfony server:start --no-tls
+
+lleego_avail_command: build # Ejecuta el comando de disponibilidad de Lleego
+	${DOCKER_EXEC} bin/console lleego:avail ${ARGS}
