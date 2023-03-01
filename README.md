@@ -45,3 +45,15 @@ Se puede acceder al endpoint de la prueba en la ruta /api/avail
 ```
 http://localhost:8000/api/avail?origin=MAD&destination=BIO&date=2022-06-01
 ```
+
+## Comandos
+
+Mediante el comando en Makefile lleego_avail_command, podemos consultar el listado de vuelos disponibles.
+```shell
+make lleego_avail_command ARGS="MAD BIO 2022-06-01"
+```
+
+## Testing
+
+Cobertura de tests al 100% en los ficheros de la aplicación, para comprobarlo ejecutar el comando make 
+tests e ir a la carpeta ./coverage/index.html
