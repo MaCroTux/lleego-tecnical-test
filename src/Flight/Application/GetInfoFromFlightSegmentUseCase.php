@@ -2,34 +2,29 @@
 
 namespace App\Flight\Application;
 
-use DateTimeImmutable;
-use SimpleXMLElement;
+use App\Flight\Domain\Segment;
+use App\Flight\Domain\SegmentRepository;
 
 class GetInfoFromFlightSegmentUseCase
 {
-    private SimpleXMLElement $xmlData;
-
-    public function __construct(string $xmlFileName)
+    public function __construct(private readonly SegmentRepository $segmentRepository)
     {
-        $this->xmlData = simplexml_load_string(
-            file_get_contents(__DIR__ . $xmlFileName)
-        );
     }
 
     public function __invoke(): array
         {
             $flightSegments = [];
-            foreach ($this->xmlData->DataLists->FlightSegmentList->children() as $item) {
+            foreach ($this->segmentRepository->getAllFlightSegmentsList() as $item) {
                 $flightSegments[] = new GetInfoFromFlightSegmentUseResponse(
-                    (string) $item->Departure->AirportCode,
-                    (string) $item->Departure->AirportName,
-                    (string) $item->Arrival->AirportCode,
-                    (string) $item->Arrival->AirportName,
-                    new DateTimeImmutable((string) $item->Departure->Date),
-                    new DateTimeImmutable((string) $item->Arrival->Date),
-                    (string) $item->MarketingCarrier->FlightNumber,
-                    (string) $item->MarketingCarrier->AirlineID,
-                    (string) $item->MarketingCarrier->Name,
+                    $item->getOriginCode(),
+                    $item->getOriginName(),
+                    $item->getDestinationCode(),
+                    $item->getDestinationName(),
+                    $item->getStart(),
+                    $item->getEnd(),
+                    $item->getTransportNumber(),
+                    $item->getCompanyCode(),
+                    $item->getCompanyName(),
                 );
             }
 

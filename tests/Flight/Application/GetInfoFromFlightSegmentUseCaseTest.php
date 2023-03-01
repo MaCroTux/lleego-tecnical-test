@@ -4,6 +4,8 @@ namespace App\Tests\Flight\Application;
 
 use App\Flight\Application\GetInfoFromFlightSegmentUseCase;
 use App\Flight\Application\GetInfoFromFlightSegmentUseResponse;
+use App\Flight\Domain\XmlReadException;
+use App\Flight\Infrastructure\SegmentReadFileNoSoapRepository;
 use PHPUnit\Framework\TestCase;
 
 class GetInfoFromFlightSegmentUseCaseTest extends TestCase
@@ -91,7 +93,9 @@ class GetInfoFromFlightSegmentUseCaseTest extends TestCase
     public function testGetInfoFromFlightSegmentUseCase(): void
     {
         $sut = new GetInfoFromFlightSegmentUseCase(
-            '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP.xml'
+            new SegmentReadFileNoSoapRepository(
+                '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP.xml'
+            )
         );
 
         $responseList = $sut->__invoke();
@@ -112,5 +116,16 @@ class GetInfoFromFlightSegmentUseCaseTest extends TestCase
         $this->assertSame(self::ASSERTION_FLIGHT[$index][6], $response->getTransportNumber());
         $this->assertSame(self::ASSERTION_FLIGHT[$index][7], $response->getCompanyCode());
         $this->assertSame(self::ASSERTION_FLIGHT[$index][8], $response->getCompanyName());
+    }
+
+    public function testShouldFailWhenXmlFileIsNotReadable(): void
+    {
+        $this->expectException(XmlReadException::class);
+
+        new GetInfoFromFlightSegmentUseCase(
+            new SegmentReadFileNoSoapRepository(
+                '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP_ERROR.xml'
+            )
+        );
     }
 }
