@@ -4,6 +4,8 @@ namespace App\Tests\Flight\Application;
 
 use App\Flight\Application\GetInfoFromFlightSegmentUseCase;
 use App\Flight\Application\GetInfoFromFlightSegmentUseResponse;
+use App\Flight\Domain\FlightSegmentService;
+use App\Flight\Domain\InvalidDateException;
 use App\Flight\Domain\XmlReadException;
 use App\Flight\Infrastructure\SegmentReadFileNoSoapRepository;
 use PHPUnit\Framework\TestCase;
@@ -90,19 +92,46 @@ class GetInfoFromFlightSegmentUseCaseTest extends TestCase
         ],
     ];
 
-    public function testGetInfoFromFlightSegmentUseCase(): void
+    public function testGetInfoFromFlightSegment(): void
     {
+        $origin = 'MAD';
+        $destination = 'BIO';
+        $date = '2022-06-01';
+
         $sut = new GetInfoFromFlightSegmentUseCase(
-            new SegmentReadFileNoSoapRepository(
-                '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP.xml'
+            new FlightSegmentService(
+                new SegmentReadFileNoSoapRepository(
+                    '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP.xml'
+                )
             )
         );
 
-        $responseList = $sut->__invoke();
+        $responseList = $sut->__invoke($origin, $destination, $date);
 
         foreach ($responseList as $index=>$response) {
             $this->assertResponse($response, $index);
         }
+    }
+
+    /**
+     * @dataProvider providerFlightSegmentWithFilters
+     */
+    public function testGetInfoFromFlightSegmentWithFilter(
+        string $origin,
+        string $destination,
+        string $date,
+        int $numberResult
+    ): void {
+        $sut = new GetInfoFromFlightSegmentUseCase(
+            new FlightSegmentService(
+                new SegmentReadFileNoSoapRepository(
+                    '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP.xml'
+                )
+            )
+        );
+
+        $responseList = $sut->__invoke($origin, $destination, $date);
+        $this->assertCount($numberResult, $responseList);
     }
 
     private function assertResponse(GetInfoFromFlightSegmentUseResponse $response, $index): void
@@ -123,9 +152,56 @@ class GetInfoFromFlightSegmentUseCaseTest extends TestCase
         $this->expectException(XmlReadException::class);
 
         new GetInfoFromFlightSegmentUseCase(
-            new SegmentReadFileNoSoapRepository(
-                '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP_ERROR.xml'
+            new FlightSegmentService(
+                new SegmentReadFileNoSoapRepository(
+                    '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP_ERROR.xml'
+                )
             )
         );
+    }
+
+    public function testShouldThrowInvalidDateFormarExceptionWhenDateStringIsInvalid(): void
+    {
+        $this->expectException(InvalidDateException::class);
+
+        $sut = new GetInfoFromFlightSegmentUseCase(
+            new FlightSegmentService(
+                new SegmentReadFileNoSoapRepository(
+                    '/../../../ExampleFiles/MAD_BIO_OW_1PAX_RS_NO_SOAP.xml'
+                )
+            )
+        );
+
+        $sut->__invoke('MAD', 'BIO', '202/06/01');
+    }
+
+    public function providerFlightSegmentWithFilters(): array
+    {
+        return [
+            'When this parameters, use case return 5 results' => [
+                'MAD',
+                'BIO',
+                '2022-06-01',
+                5
+            ],
+            'When origin parameter is wrong, use case return 0 results' => [
+                '--',
+                'BIO',
+                '2022-06-01',
+                0
+            ],
+            'When destination parameters is wrong, use case return 0 results' => [
+                'MAD',
+                '--',
+                '2022-06-01',
+                0
+            ],
+            'When date parameters is wrong, use case return 0 results' => [
+                'MAD',
+                'BIO',
+                '2023-06-01',
+                0
+            ],
+        ];
     }
 }
