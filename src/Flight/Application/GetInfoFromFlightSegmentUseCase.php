@@ -13,7 +13,10 @@ class GetInfoFromFlightSegmentUseCase
     {
     }
 
-    /** @throws InvalidDateException */
+    /**
+     * @return GetInfoFromFlightSegmentUseResponse[]
+     * @throws InvalidDateException
+     */
     public function __invoke(string $origin, string $destination, string $date): array
     {
         try {

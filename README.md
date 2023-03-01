@@ -35,5 +35,13 @@ make tests
 
 Mediante makefile usaremos en cli de symfony para facilitar este apartado
 ```shell
-make run #symfony server:start --no-tls
+make up #symfony server:start --no-tls
+```
+
+Nota: Se debe tener instalado symfony cli
+
+Se puede acceder al endpoint de la prueba en la ruta /api/avail
+
+```
+http://localhost:8000/api/avail?origin=MAD&destination=BIO&date=2022-06-01
 ```

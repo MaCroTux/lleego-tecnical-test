@@ -101,4 +101,19 @@ class GetInfoFromFlightSegmentUseResponse
     {
         return $this->companyName;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'originCode' => $this->getOriginCode(),
+            'originName' => $this->getOriginName(),
+            'destinationCode' => $this->getDestinationCode(),
+            'destinationName' => $this->getDestinationName(),
+            'start' => $this->getStart(),
+            'end' => $this->getEnd(),
+            'transportNumber' => $this->getTransportNumber(),
+            'companyCode' => $this->getCompanyCode(),
+            'companyName' => $this->getCompanyName(),
+        ];
+    }
 }

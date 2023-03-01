@@ -30,3 +30,6 @@ composer_require: build
 tests: build composer_install # Lanza la suits de test con cobertura
 	${CODE_ANALYZER_WITH_PATH} --level 5
 	${DOCKER_EXEC} bash -c "XDEBUG_MODE=coverage bin/phpunit --coverage-html coverage"
+
+up: # Levanta el proyecto
+	symfony server:start --no-tls
